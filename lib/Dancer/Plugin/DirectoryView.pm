@@ -54,7 +54,7 @@ sub directory_view {
             # Root directory is set explicitly -- is it an absolute path?
             if (!File::Spec->file_name_is_absolute($root_dir)) {
                 # No -- we assume it's relative to the public directory
-                $root_dir = catfile($public_dir, $root_dir);
+                $root_dir = abs_path(catfile($public_dir, $root_dir));
             }
         }
         else {
@@ -116,9 +116,9 @@ sub serve_files {
     $root_dir =~ s!/$!!;
     $path =~ s!^/!!;
     
-    # If root_dir is not absolute, assume it is relative to app directory
+    # If root_dir is not absolute, assume it is relative to public directory
     if (!File::Spec->file_name_is_absolute($root_dir)) {
-        $root_dir = catfile(abs_path(setting('appdir')), $root_dir);
+        $root_dir = abs_path(catfile(abs_path(setting('public')), $root_dir));
     }
     
     my $real_path = abs_path(catfile($root_dir, $path));
@@ -129,6 +129,8 @@ sub serve_files {
         # system paths are not allowed
         return send_error("Not allowed", 403);
     }
+    
+    # TODO: Check if we're inside root_dir?
     
     if (-f $real_path) {
         #
