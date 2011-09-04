@@ -18,8 +18,11 @@ WriteMakefile(
         'File::ShareDir::Install'   => 0,
     },
     PREREQ_PM => {
+        'Dancer'     => 1.3070,
         'File::ShareDir'    => 1.0,
+        'HTTP::Date'    => 0,
         'Test::More' => 0,
+        'URI::Escape' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Dancer-Plugin-DirectoryView-*' },
