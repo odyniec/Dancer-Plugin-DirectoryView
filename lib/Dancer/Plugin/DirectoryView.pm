@@ -90,11 +90,11 @@ sub directory_view {
         #
         # Called from a route handler
         #
-        return serve_files(@_);
+        return _serve_files(@_);
     }
 }
     
-sub serve_files {    
+sub _serve_files {    
     my (%options) = @_;
     
     # Root directory
@@ -130,7 +130,13 @@ sub serve_files {
         return send_error("Not allowed", 403);
     }
     
-    # TODO: Check if we're inside root_dir?
+    # Make sure we're inside root_dir. This shouldn't actually be necessary, as
+    # Dancer takes care of potentially dangerous paths (e.g., containing "..")
+    # and we should be safe at this point, but let's do the check anyway in case
+    # the application is deployed in some weird insecure way or something.
+    if (index($real_path, $root_dir) != 0) {
+        return send_error("Not allowed", 403);
+    }
     
     if (-f $real_path) {
         #
@@ -204,7 +210,7 @@ sub serve_files {
             push(@files, {
                 url => $url,
                 name => $name,
-                size => $is_dir ? '' : format_size($stat[7]),
+                size => $is_dir ? '' : _format_size($stat[7]),
                 mime_type => $mime_type,
                 mtime => HTTP::Date::time2str($stat[9]),
                 class => $classes{$mime_type} || 'file-unknown'
@@ -327,7 +333,7 @@ register 'directory_view' => \&directory_view;
 
 register_plugin;
 
-sub format_size {
+sub _format_size {
     my ($size) = @_;
     $size ||= 0;
     
