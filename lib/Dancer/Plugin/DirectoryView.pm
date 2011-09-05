@@ -2,8 +2,7 @@ package Dancer::Plugin::DirectoryView;
 
 =head1 NAME
 
-Dancer::Plugin::DirectoryView - Browse directory contents in Dancer web
-applications
+Dancer::Plugin::DirectoryView - Browse directory contents in Dancer web apps
 
 =cut
 
@@ -20,7 +19,7 @@ use File::Spec::Functions qw(catfile);
 use HTTP::Date;
 use URI::Escape;
 
-our $VERSION = '0.01';
+our $VERSION = '0.011';
 
 # Distribution-level shared data directory
 my $dist_dir = File::ShareDir::dist_dir('Dancer-Plugin-DirectoryView');
@@ -399,7 +398,7 @@ __END__
 
 =head1 VERSION
 
-Version 0.01
+Version 0.011
 
 =head1 SYNOPSIS
 

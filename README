@@ -1,9 +1,9 @@
 NAME
     Dancer::Plugin::DirectoryView - Browse directory contents in Dancer web
-    applications
+    apps
 
 VERSION
-    Version 0.01
+    Version 0.011
 
 SYNOPSIS
         use Dancer::Plugin::DirectoryView;
