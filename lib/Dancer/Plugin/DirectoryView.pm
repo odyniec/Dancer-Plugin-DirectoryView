@@ -527,9 +527,9 @@ The URL at which the root directory will be accessible.
 
 In the simplest example, the root directory is located under the C<public>
 directory of the application, so it's already intended to be world-accessible
-and you don't have worry about C<system_path> and permissions. Assuming that the
-directory is C<public/files/docs>, you can enable it either with the following
-entries in the configuration file:
+and you don't have to worry about C<system_path> and permissions. Assuming that
+the directory is C<public/files/docs>, you can enable it either with the
+following entries in the configuration file:
 
     plugins:
         DirectoryView:
