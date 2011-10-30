@@ -19,7 +19,7 @@ use File::Spec::Functions qw(catfile);
 use HTTP::Date;
 use URI::Escape;
 
-our $VERSION = '0.011';
+our $VERSION = '0.02';
 
 # Distribution-level shared data directory
 my $dist_dir = File::ShareDir::dist_dir('Dancer-Plugin-DirectoryView');
@@ -328,6 +328,12 @@ if (exists $settings->{url}) {
     directory_view $settings->{url} => $settings;
 }
 
+if (exists $settings->{directories}) {
+    for my $url (keys %{$settings->{directories}}) {
+        directory_view $url => $settings->{directories}->{$url} || {};
+    }
+}
+
 register 'directory_view' => \&directory_view;
 
 register_plugin;
@@ -398,7 +404,7 @@ __END__
 
 =head1 VERSION
 
-Version 0.011
+Version 0.02
 
 =head1 SYNOPSIS
 
@@ -411,7 +417,7 @@ Version 0.011
     directory_view '/files/other' => { root_dir => '/some/other/directory',
                                        system_path => 1 };
 
-    # Calling directory_view in a route handler
+    # Call directory_view in a route handler
     get qr{/files/secret/(.*)} => sub {
         my ($path) = splat;
         
@@ -437,8 +443,9 @@ deployed.
 
 =head1 CONFIGURATION
 
-If there's just one directory that you want to make accessible, you can
-configure it in the configuration file of your application, under C<plugins>:
+Put the plugin's settings in the configuration file of your application, under
+C<plugins>. If there's just one directory that you want to make accessible, set
+its URL with the C<url> option:
 
     plugins:
         DirectoryView:
@@ -447,10 +454,24 @@ configure it in the configuration file of your application, under C<plugins>:
             show_hidden_files: 1
             system_path: 1
 
-If there are more directories, you need to set them up by calling the
-C<directory_view> function in your app. The first parameter is a string that
-defines the URL at which the directory contents will be available, the second is
-a reference to a hash with options. Example:
+If you want to configure more than one directory, use the C<directories> option
+to set a different set of options for each directory:
+
+    plugins:
+        DirectoryView:
+            directories:
+                "/pub/files":
+                    root_dir: /some/directory
+                    show_hidden_files: 1
+                    system_path: 1
+                "/pub/documents":
+                    root_dir: /other/directory
+                    system_path: 1
+
+You can also enable directory browsing by calling the C<directory_view> function
+in your app. The first parameter passed to the function is a string that defines
+the URL at which the directory contents will be available, the second is a
+reference to a hash with options. Example:
 
     directory_view '/pub/photos' => { root_dir => '/home/mike/photos',
                                       system_path => 1 };
@@ -459,6 +480,10 @@ a reference to a hash with options. Example:
                                          system_path => 1 };
 
 The available configuration options are listed below.
+
+=head2 directories
+
+Used to configure multiple directories.
 
 =head2 layout
 
