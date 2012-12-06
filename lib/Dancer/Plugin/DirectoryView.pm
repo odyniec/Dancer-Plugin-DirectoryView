@@ -16,7 +16,7 @@ use Dancer::Plugin;
 use DirHandle;
 use File::ShareDir;
 use File::Spec::Functions qw(catfile);
-use HTTP::Date;
+use Date::Format;
 use URI::Escape;
 
 our $VERSION = '0.02';
@@ -110,6 +110,9 @@ sub _serve_files {
     
     # Views directory
     my $views_dir = abs_path(setting('views'));
+    
+    # Timeformat for directory-listing
+    my $timeformat = $options{timeformat} || '%a, %d %b %Y %H:%M:%S %Z';
     
     # Strip off unwanted leading/trailing slashes
     $root_dir =~ s!/$!!;
@@ -211,7 +214,7 @@ sub _serve_files {
                 name => $name,
                 size => $is_dir ? '' : _format_size($stat[7]),
                 mime_type => $mime_type,
-                mtime => HTTP::Date::time2str($stat[9]),
+                mtime => time2str($timeformat, $stat[9]),
                 class => $classes{$mime_type} || 'file-unknown'
             });
         }
