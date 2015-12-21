@@ -1,12 +1,11 @@
 package Dancer::Plugin::DirectoryView;
 
-=head1 NAME
-
-Dancer::Plugin::DirectoryView - Browse directory contents in Dancer web apps
-
-=cut
-
 use strict;
+use warnings;
+
+# ABSTRACT: Browse directory contents in Dancer web apps
+
+# VERSION
 
 use Cwd 'abs_path';
 use Dancer ':syntax';
@@ -18,8 +17,6 @@ use File::ShareDir;
 use File::Spec::Functions qw(catfile);
 use HTTP::Date;
 use URI::Escape;
-
-our $VERSION = '0.02';
 
 # Distribution-level shared data directory
 my $dist_dir = File::ShareDir::dist_dir('Dancer-Plugin-DirectoryView');
@@ -400,12 +397,6 @@ END
 1; # End of Dancer::Plugin::DirectoryView
 __END__
 
-=pod
-
-=head1 VERSION
-
-Version 0.02
-
 =head1 SYNOPSIS
 
     use Dancer::Plugin::DirectoryView;
@@ -613,62 +604,11 @@ Or this call:
 
     directory_view: '/logs' => { root_dir => '../logs', system_path => 1 };
 
-=head1 AUTHOR
-
-Michal Wojciechowski, C<< <odyniec at cpan.org> >>
-
-=head1 BUGS
-
-Please report any bugs or feature requests to C<bug-dancer-plugin-directoryview at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Dancer-Plugin-DirectoryView>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
-    perldoc Dancer::Plugin::DirectoryView
-
-
-You can also look for information at:
-
-=over 4
-
-=item * RT: CPAN's request tracker
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Dancer-Plugin-DirectoryView>
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/Dancer-Plugin-DirectoryView>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/Dancer-Plugin-DirectoryView>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/Dancer-Plugin-DirectoryView/>
-
-=back
-
-
 =head1 ACKNOWLEDGEMENTS
 
 Some parts of the code were heavily inspired by Tatsuhiko Miyagawa's
 L<Plack::App::Directory>.
 
 Used icons from the Oxygen Icons project (L<http://www.oxygen-icons.org/>).
-
-=head1 LICENSE AND COPYRIGHT
-
-Copyright 2011 Michal Wojciechowski.
-
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
-
-See http://dev.perl.org/licenses/ for more information.
-
 
 =cut
