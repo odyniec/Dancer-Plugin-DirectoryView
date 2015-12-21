@@ -1,0 +1,257 @@
+=pod
+
+=encoding UTF-8
+
+=head1 NAME
+
+Dancer::Plugin::DirectoryView - Browse directory contents in Dancer web apps
+
+=head1 VERSION
+
+version 0.02
+
+=head1 SYNOPSIS
+
+    use Dancer::Plugin::DirectoryView;
+
+    # Allow browsing of public/files/share
+    directory_view '/files/share';
+    
+    # Browse /some/other/directory (located outside of public) as /files/other
+    directory_view '/files/other' => { root_dir => '/some/other/directory',
+                                       system_path => 1 };
+
+    # Call directory_view in a route handler
+    get qr{/files/secret/(.*)} => sub {
+        my ($path) = splat;
+        
+        # Check if the user has permissions to access these files
+        if (...) {
+            return directory_view(root_dir => '/some/secret/directory',
+                                  path => $path,
+                                  system_path => 1);
+        }
+        else {
+            return send_error("Access denied!", 403);
+        }
+    };
+
+=head1 DESCRIPTION
+
+Dancer::Plugin::DirectoryView provides an easy way to allow the users of your
+web application to browse the contents of specific directories on the server. It
+generates directory index pages to navigate through the directories, in a
+similar fashion as Apache's mod_autoindex and Plack::App::Directory, but in
+contrast to those solutions, it does not depend on how your application is
+deployed.
+
+=head1 CONFIGURATION
+
+Put the plugin's settings in the configuration file of your application, under
+C<plugins>. If there's just one directory that you want to make accessible, set
+its URL with the C<url> option:
+
+    plugins:
+        DirectoryView:
+            url: /pub/files
+            root_dir: /some/directory
+            show_hidden_files: 1
+            system_path: 1
+
+If you want to configure more than one directory, use the C<directories> option
+to set a different set of options for each directory:
+
+    plugins:
+        DirectoryView:
+            directories:
+                "/pub/files":
+                    root_dir: /some/directory
+                    show_hidden_files: 1
+                    system_path: 1
+                "/pub/documents":
+                    root_dir: /other/directory
+                    system_path: 1
+
+You can also enable directory browsing by calling the C<directory_view> function
+in your app. The first parameter passed to the function is a string that defines
+the URL at which the directory contents will be available, the second is a
+reference to a hash with options. Example:
+
+    directory_view '/pub/photos' => { root_dir => '/home/mike/photos',
+                                      system_path => 1 };
+                                       
+    directory_view '/pub/documents' => { root_dir => '/usr/share/doc',
+                                         system_path => 1 };
+
+The available configuration options are listed below.
+
+=head2 directories
+
+Used to configure multiple directories.
+
+=head2 layout
+
+If set to C<1>, the directory listing is displayed in the application's default
+layout (instead of the layout defined by the C<template>). If set to a name of
+a file under C<views/layouts>, that file is used as the layout.
+
+=head2 path
+
+The current path to browse/display, relative to C<root_dir>. Required when
+C<directory_view> is called in a route handler.
+
+=head2 root_dir
+
+The root directory which will be available to the users. If it's a relative
+path, it is assumed to be located under C<public>. It must be specified when
+C<directory_view> is called in a route handler. If C<directory_view> is called
+outside a route handler, then C<root_dir> may be omitted, and it will be assumed
+to be the same as the base URL and relative to C<public>.
+
+=head2 show_hidden_files
+
+If set to C<1>, hidden files (with names starting with C<.>) are included in the
+directory listing.
+
+Default: C<0>
+
+=head2 system_path
+
+If set to C<1>, directories and files outside the C<public> directory can be
+accessed. This is required if C<root_dir> itself is located outside of
+C<public>.
+
+Default: C<0>
+
+=head2 template
+
+The template to use. It is the name of a directory containing three template
+files:
+
+=over 4
+
+=item * C<layout.tt> - The layout in which the directory listing is displayed
+(the HTML document that wraps the listing)
+
+=item * C<listing.tt> - The template for the directory listing container (e.g.,
+a table header/footer)
+
+=item * C<file.tt> - The template for a single file in the listing (e.g., a
+table row)
+
+=back
+
+The plugin first looks for this directory in the application's C<views>
+directory, then in its own C<views> directory.
+
+Default: C<"basic">
+
+=head2 url
+
+The URL at which the root directory will be accessible.
+
+=head1 EXAMPLES
+
+=head2 Directory under C<public>
+
+In the simplest example, the root directory is located under the C<public>
+directory of the application, so it's already intended to be world-accessible
+and you don't have to worry about C<system_path> and permissions. Assuming that
+the directory is C<public/files/docs>, you can enable it either with the
+following entries in the configuration file:
+
+    plugins:
+        DirectoryView:
+            url: /files/docs
+
+or with this call in your application:
+
+    directory_view '/files/docs';
+
+=head2 Directory under C<public> with a different URL
+
+If you want to make the directory accessible, but with a different URL than the
+system path, provide both the C<url> and the C<root_dir> options in the
+configuration file: 
+
+    plugins:
+        DirectoryView:
+            url: /documents
+            root_dir: files/docs
+
+Or, call C<directory_view> like this:
+
+    directory_view '/documents' => { root_dir => 'files/docs' };
+
+=head2 Directory outside C<public>
+
+When the root directory is located outside of C<public>, you need to enter both
+the desired C<url> and C<root_dir>, as well as enable the C<system_path> option
+to allow access to files not within the C<public> directory. Example
+configuration:
+
+    DirectoryView:
+        url: /holiday-photos
+        root_dir: /home/user/photos/holidays
+        system_path: 1
+
+Example call:
+
+    directory_view '/holiday-photos' => { root_dir => '/home/user/photos/holidays',
+                                          system_path => 1 };
+
+=head2 Directory outside C<public> with relative path
+
+Using a relative path in C<root_dir>, you can also access directories above
+the C<public> directory of your application. For example, if for some reason you
+would like to let users view your application's logs, you could use this
+configuration:
+
+    plugins:
+        DirectoryView:
+            url: /logs
+            root_dir: ../logs
+            system_path: 1
+
+Or this call:
+
+    directory_view: '/logs' => { root_dir => '../logs', system_path => 1 };
+
+=head1 ACKNOWLEDGEMENTS
+
+Some parts of the code were heavily inspired by Tatsuhiko Miyagawa's
+L<Plack::App::Directory>.
+
+Used icons from the Oxygen Icons project (L<http://www.oxygen-icons.org/>).
+
+=for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders metacpan
+
+=head1 SUPPORT
+
+=head2 Bugs / Feature Requests
+
+Please report any bugs or feature requests through the issue tracker
+at L<https://github.com/oiami/Dancer-Plugin-DirectoryView/issues>.
+You will be notified automatically of any progress on your issue.
+
+=head2 Source Code
+
+This is open source software.  The code repository is available for
+public review and contribution under the terms of the license.
+
+L<https://github.com/oiami/Dancer-Plugin-DirectoryView>
+
+  git clone https://github.com/oiami/Dancer-Plugin-DirectoryView.git
+
+=head1 AUTHOR
+
+Michal Wojciechowski <odyniec@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2011 by Michal Wojciechowski.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut
